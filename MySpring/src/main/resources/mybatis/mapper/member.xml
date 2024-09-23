@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.mypage.member.dao.IMemberDAO">
+
+	<!-- 회원 가입 -->
+	<insert id="registMember" parameterType="com.spring.mypage.member.dto.MemberDTO">
+		INSERT INTO members (
+		      mem_id
+		    , mem_password
+		    , mem_name
+		    , mem_phone
+		    , mem_email
+		    , mem_lv
+		) VALUES(
+		      #{memId}
+		    , #{memPassword}
+		    , #{memName}
+		    , #{memPhone}
+		    , #{memEmail}
+		    , '1'
+		)
+	
+	</insert>
+
+	<!-- 로그인 -->
+	<select id="loginDo" parameterType="MemberDTO" resultType="MemberDTO">
+		SELECT 
+		      mem_id
+		    , mem_password
+		    , mem_name
+		    , mem_phone
+		    , mem_email
+		    , mem_profile_img
+		    , mem_lv
+		FROM 
+			members
+		WHERE 1=1
+		  	AND mem_id = #{memId}
+	</select>
+	
+	<!-- 회원 한명 정보 -->
+	<select id="getMember" parameterType="String" resultType="MemberDTO">
+		SELECT 
+		      mem_id
+		    , mem_password
+		    , mem_name
+		    , mem_phone
+		    , mem_email
+		    , mem_profile_img
+		    , mem_lv
+		FROM members
+		WHERE 1=1
+			AND mem_id = #{memId}
+	</select>
+	
+	
+	<!-- 회원 정보 수정 -->
+	<update id="updateMember" parameterType="MemberDTO">
+		UPDATE members
+		SET   
+			  mem_name = #{memName}
+			, mem_phone = #{memPhone}
+			, mem_email = #{memEmail}
+		<if test="memPassword.isEmpty() == false">
+		   ,mem_password = #{memPassword}
+		</if>			
+		WHERE 1=1
+			AND mem_id = #{memId}
+	</update>
+	
+	<!-- 회원 탈퇴 -->
+	<delete id="deleteMember" parameterType="String" >
+		DELETE FROM members
+		WHERE mem_id = #{memId}
+	</delete>
+
+
+	<!-- 회원 프로필 이미지 -->
+	<update id="updateProfile" parameterType="MemberDTO">
+		UPDATE members
+		  SET mem_profile_img = #{memProfileImg}
+		WHERE mem_id = #{memId}
+	
+	</update>
+
+	<!-- 회원 리스트 불러오기 -->
+	<select id="getMemList" resultType="MemberDTO">
+		SELECT 
+		      mem_id
+		    , mem_password
+		    , mem_name
+		    , mem_phone
+		    , mem_email
+		    , mem_lv
+		    , ROWNUM AS rnum
+		FROM members
+		ORDER BY rnum
+	</select>
+
+	<!-- 관리자 권한 추가 -->
+	<update id="updateAdminDo" parameterType="String">
+		UPDATE members
+		  SET mem_lv = 0
+		WHERE mem_id = #{memId}
+	</update>
+
+	<!-- 관리자 권한 제거 -->
+	<update id="outAdminDo" parameterType="String">
+		UPDATE members
+		  SET mem_lv = 1
+		WHERE mem_id = #{memId}
+	</update>
+
+
+</mapper>

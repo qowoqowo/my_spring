@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.3.xsd">
+	
+	<!-- Root Context: defines shared resources visible to all other web components -->
+		
+	<!-- 오라클 DB에 연결할 수 있도록 객체 생성 -->
+	<!-- id-dataSource 는 생성된 객체를 의미 -->
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="#{util['jdbc.driverClassName']}"></property>
+		<property name="url" value="#{util['jdbc.url']}"></property>
+		<property name="username" value="#{util['jdbc.username']}"></property>
+		<property name="password" value="#{util['jdbc.password']}"></property>
+	</bean>
+	
+	<!-- 위 dataSource 객체와 mybatis 설정 파일,
+		 mybatis mapper 파일들의 경로를 취합하는 객체 생성 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"></property>
+		<!-- /WEB-INF/classes/mybatis/mapper/ 경로 내 모든 xml 파일들을 불러옴 -->
+		<property name="mapperLocations" value="/WEB-INF/classes/mybatis/mapper/*.xml"></property>
+		<property name="configLocation" value="/WEB-INF/classes/mybatis/mybatis-config.xml"></property>
+	</bean>
+		
+	<!-- mybatis의 mapper 어노테이션이 붙은 인터페이스 객체를 스캔해서 생성시키는 설정 -->
+	<mybatis-spring:scan base-package="com.spring.mypage" annotation="org.apache.ibatis.annotations.Mapper"/>
+		
+	
+	<!-- appconfig.properties 파일을 읽어오는 객체 생성, 객체명은 util -->
+	<util:properties id="util" location="/WEB-INF/classes/spring/appconfig.properties"></util:properties>
+		
+</beans>

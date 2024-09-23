@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.mypage.reply.dao.IReplyDAO">
+
+	<!-- 자유게시판 댓글 작성 -->
+	<insert id="insertReply" parameterType="com.spring.mypage.reply.dto.ReplyDTO">
+		INSERT INTO replys(
+		      reply_no 
+		    , board_no
+		    , mem_id 
+		    , reply_content 
+		    , reply_date 
+		    , del_yn 
+		) VALUES (
+		      #{replyNo}
+		    , #{boardNo}
+		    , #{memId}
+		    , #{replyContent}
+		    , SYSDATE
+		    , 'N'
+		)	
+	</insert>
+	
+	<!-- 사진게시판 댓글 작성 -->
+	<insert id="photoInsertReply" parameterType="com.spring.mypage.reply.dto.ReplyDTO">
+		INSERT INTO p_replys(
+		      reply_no 
+		    , photo_no
+		    , mem_id 
+		    , reply_content 
+		    , reply_date 
+		    , del_yn 
+		) VALUES (
+		      #{replyNo}
+		    , #{photoNo}
+		    , #{memId}
+		    , #{replyContent}
+		    , SYSDATE
+		    , 'N'
+		)		
+	</insert>
+
+	<!--자유게시판 댓글 조회 -->
+	<select id="getReply" parameterType="String" resultType="com.spring.mypage.reply.dto.ReplyDTO">
+		SELECT
+		      a.reply_no
+		    , a.board_no
+		    , a.mem_id
+		    , b.mem_name
+		    , a.reply_content
+		    , TO_CHAR(a.reply_date, 'MM-DD HH24:MI') AS reply_date
+		FROM replys a, members b
+		WHERE 1=1
+		    AND a.mem_id = b.mem_id
+		    AND a.del_yn = 'N'
+		    AND a.reply_no = #{replyNo}	
+	</select>
+	
+	<!-- 사진게시판 댓글 조회 -->
+	<select id="photoGetReply" parameterType="String" resultType="com.spring.mypage.reply.dto.ReplyDTO">
+		SELECT
+		      a.reply_no
+		    , a.photo_no
+		    , a.mem_id
+		    , b.mem_name
+		    , a.reply_content
+		    , TO_CHAR(a.reply_date, 'MM-DD HH24:MI') AS reply_date
+		FROM p_replys a, members b
+		WHERE 1=1
+		    AND a.mem_id = b.mem_id
+		    AND a.del_yn = 'N'
+		    AND a.reply_no = #{replyNo}	
+	</select>
+
+	<!-- 자유게시판 댓글 리스트 -->
+	<select id="getReplyList" resultType="com.spring.mypage.reply.dto.ReplyDTO">	
+		SELECT
+		      a.reply_no
+		    , a.board_no
+		    , a.mem_id
+		    , b.mem_name
+		    , a.reply_content
+		    , TO_CHAR(a.reply_date, 'MM-DD HH24:MI') AS reply_date
+		FROM replys a, members b
+		WHERE 1=1
+		    AND a.mem_id = b.mem_id
+		    AND a.del_yn = 'N'
+		    AND a.board_no = #{boardNo}
+		    ORDER BY a.reply_date ASC
+	</select>
+	
+	<!-- 사진게시판 댓글 리스트 -->
+	<select id="photoGetReplyList" resultType="com.spring.mypage.reply.dto.ReplyDTO">	
+		SELECT
+		      a.reply_no
+		    , a.photo_no
+		    , a.mem_id
+		    , b.mem_name
+		    , a.reply_content
+		    , TO_CHAR(a.reply_date, 'MM-DD HH24:MI') AS reply_date
+		FROM p_replys a, members b
+		WHERE 1=1
+		    AND a.mem_id = b.mem_id
+		    AND a.del_yn = 'N'
+		    AND a.photo_no = #{photoNo}
+		    ORDER BY a.reply_date ASC
+	</select>	
+
+	<!-- 자유게시판 댓글 삭제 -->
+	<update id="deleteReply" parameterType="String" >
+		UPDATE replys
+		SET del_yn = 'Y'
+		WHERE reply_no = #{replyNo}	
+	</update>
+
+	<!-- 사진게시판 댓글 삭제 -->
+	<update id="photoDeleteReply" parameterType="String" >
+		UPDATE p_replys
+		SET del_yn = 'Y'
+		WHERE reply_no = #{replyNo}	
+	</update>
+
+
+
+
+
+
+
+</mapper>

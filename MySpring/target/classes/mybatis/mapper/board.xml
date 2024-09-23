@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.mypage.board.dao.IBoardDAO">
+
+
+	<sql id="boardSearch">
+	    <if test="searchWord != null">
+	    	<choose>
+	    		<when test="searchOption == 'title'">AND a.board_title LIKE '%' || #{searchWord} || '%'</when>
+	    		<when test="searchOption == 'content'">AND a.board_content LIKE '%' || #{searchWord} || '%'</when>
+	    		<when test="searchOption == 'name'">AND b.mem_name = #{searchWord} </when>
+	    	</choose>
+	    </if>
+	</sql>
+
+	<!-- 자유게시판 목록 -->
+	<select id="getBoardList" parameterType="com.spring.mypage.common.vo.SearchVO" resultType="BoardDTO">
+		SELECT *
+		FROM (
+			SELECT
+				a.*
+				, ROWNUM AS rnum
+			FROM (
+				SELECT 
+				      a.board_no
+				    , a.board_title 
+				    , a.mem_id 
+				    , NVL(b.mem_name, '탈퇴한 회원') AS mem_name
+				    , a.board_content 
+				    , TO_CHAR(a.board_date,'MM-DD HH24:MI') AS board_date
+				    , board_count
+				FROM boards a , members b
+				WHERE 1=1
+				    AND a.mem_id = b.mem_id(+)
+				    AND a.del_yn = 'N'
+				<include refid="boardSearch"/>
+				ORDER BY board_no DESC
+			) a
+		)
+		WHERE rnum BETWEEN #{start} AND #{end}
+	</select>
+
+
+	<!-- 자유게시판 글 한개 -->
+	<select id="getBoard" resultType="BoardDTO">
+		SELECT 
+		      a.board_no
+		    , a.board_title 
+		    , a.mem_id 
+		    , NVL(b.mem_name, '탈퇴한 회원') AS mem_name
+		    , a.board_content 
+		    , TO_CHAR(board_date,'YYYY-MM-DD HH24:MI:SS') AS board_date
+		    , board_count
+		FROM boards a , members b
+		WHERE 1=1
+		    AND a.mem_id = b.mem_id(+)
+		    AND a.del_yn = 'N'
+		    AND a.board_no = #{no}
+	</select>
+
+	<!-- 자유게시판 조회수 -->
+	<update id="boardCountUp" parameterType="int">
+		UPDATE boards
+		SET 
+			board_count = board_count + 1
+		WHERE board_no = #{boardNo}
+	</update>
+
+	<!-- 자유게시판 글쓰기 -->
+	<insert id="writeBoard" parameterType="BoardDTO">
+		INSERT INTO boards (
+		      board_no
+		    , board_title 
+		    , mem_id 
+		    , board_content 
+		    , board_date 
+		    , del_yn 
+		    , board_count
+		
+		)VALUES(
+		      (SELECT COUNT(*)+1 FROM boards)
+		    , #{boardTitle}
+		    , #{memId}
+		    , #{boardContent}
+		    ,  SYSDATE
+		    , 'N'
+		    , 0
+		)
+	
+	</insert>
+	
+	<!-- 자유게시판 글수정 -->
+	<update id="updateBoard" parameterType="BoardDTO">
+		UPDATE boards 
+		SET
+		      board_title = #{boardTitle}
+		    , board_content = #{boardContent}
+		WHERE 1=1
+		    AND board_no = #{boardNo}
+	</update>
+	
+	<!-- 자유게시판 글 삭제 -->
+	<update id="deleteBoard">
+		UPDATE boards
+		SET
+			del_yn = 'Y'
+		WHERE 1=1
+			AND board_no = #{boardNo}
+	
+	</update>
+	
+	<!-- 자유게시판 아이디 null로 -->
+	<update id="noMemIdBoard" parameterType="String">
+		UPDATE boards
+		SET	mem_id = null
+		WHERE 1=1
+			AND mem_id = #{memId}
+	</update>
+	
+	<!-- searchOption과 searchWord에 따른 게시글의 수 조회 -->
+	<select id="getBoardCount" resultType="int" parameterType="com.spring.mypage.common.vo.SearchVO">
+		SELECT COUNT(*)
+		FROM boards a, members b
+		WHERE 1=1 
+			AND del_yn = 'N'
+			AND a.mem_id = b.mem_id(+)
+			<include refid="boardSearch"/>
+	</select>
+	
+	<!-- 사진게시판 글쓰기 -->
+	<insert id="writePhoto" parameterType="com.spring.mypage.board.dto.PhotoDTO">
+		INSERT INTO photos (
+		      photo_no
+		    , photo_title 
+		    , mem_id 
+		    , photo_path
+		    , photo_date 
+		    , del_yn 
+		    , photo_count
+		
+		)VALUES(
+		      (SELECT COUNT(*)+1 FROM photos)
+		    , #{photoTitle}
+		    , #{memId}
+		    , #{photoPath}
+		    ,  SYSDATE
+		    , 'N'
+		    , 0
+		)
+	
+	</insert>
+
+	<!-- 사진게시판 목록 -->
+	<select id="getPhotoList" resultType="com.spring.mypage.board.dto.PhotoDTO">
+		SELECT *
+		FROM (
+			SELECT
+			    a.*
+			    , ROWNUM AS rnum
+			FROM (
+			    SELECT 
+			          a.photo_no
+			        , a.photo_title 
+			        , a.mem_id 
+			        , NVL(b.mem_name, '탈퇴한 회원') AS mem_name
+			        , a.photo_path
+			        , TO_CHAR(a.photo_date,'MM-DD HH24:MI') AS photo_date
+			        , photo_count
+			    FROM photos a , members b
+			    WHERE 1=1
+			        AND a.mem_id = b.mem_id(+)
+			        AND a.del_yn = 'N'
+			    ORDER BY photo_no DESC
+			) a
+		)
+		WHERE rnum BETWEEN #{start} AND #{end}		
+	</select>
+
+	<!-- 사진게시판 글 한개 -->
+	<select id="getPhoto" resultType="com.spring.mypage.board.dto.PhotoDTO">
+		SELECT 
+		      a.photo_no
+		    , a.photo_title 
+		    , a.mem_id 
+		    , NVL(b.mem_name, '탈퇴한 회원') AS mem_name
+		    , a.photo_path
+		    , TO_CHAR(photo_date,'YYYY-MM-DD HH24:MI:SS') AS photo_date
+		    , photo_count
+		FROM photos a , members b
+		WHERE 1=1
+		    AND a.mem_id = b.mem_id(+)
+		    AND a.del_yn = 'N'
+		    AND a.photo_no = #{no}
+	</select>
+	
+	<!-- 사진게시판 조회수 -->
+	<update id="photoCountUp" parameterType="int">
+		UPDATE photos
+		SET 
+			photo_count = photo_count + 1
+		WHERE photo_no = #{photoNo}
+	</update>	
+	
+	<!-- 사진게시판 글 삭제 -->
+	<update id="deletePhoto">
+		UPDATE photos
+		SET
+			del_yn = 'Y'
+		WHERE 1=1
+			AND photo_no = #{photoNo}
+	</update>
+
+	<!-- 사진게시판 글 수정 -->
+	<update id="updatePhoto" parameterType="com.spring.mypage.board.dto.PhotoDTO">
+		UPDATE photos 
+		SET
+		      photo_title = #{photoTitle}
+		    , photo_path = #{photoPath}
+		WHERE 1=1
+		    AND photo_no = #{photoNo}
+	
+	</update>
+
+	<!-- 사진게시판 전체 글 수 (삭제안된거) -->
+	<select id="getPhotoCount" resultType="int" parameterType="com.spring.mypage.common.vo.SearchVO">
+		SELECT COUNT(*) 
+		FROM photos a, members b
+		WHERE 1=1 
+			AND del_yn = 'N'
+			AND a.mem_id = b.mem_id(+)
+	</select>
+
+	<!-- 작성자 null값으로 변경 -->
+	<update id="noMemIdPhoto" parameterType="String">
+		UPDATE photos
+		SET	mem_id = null
+		WHERE 1=1
+			AND mem_id = #{memId}
+	</update>
+
+
+
+
+
+</mapper>

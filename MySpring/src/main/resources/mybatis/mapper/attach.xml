@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.mypage.attach.dao.IAttachDAO">
+	
+	<insert id="insertAttach" parameterType="com.spring.mypage.attach.dto.AttachDTO">
+		INSERT INTO attach (
+		      atch_no 
+		    , board_no 
+		    , atch_file_name 
+		    , atch_original_name
+		    , atch_file_size 
+		    , atch_fancy_size
+		    , atch_content_type
+		    , atch_path 
+		) VALUES (
+		      seq_attach.NEXTVAL
+		    , (SELECT COUNT(*)+1 FROM boards)
+		    , #{atchFileName}
+		    , #{atchOriginalName}
+		    , #{atchFileSize}
+		    , #{atchFancySize}
+		    , #{atchContentType}
+		    , #{atchPath}
+		)		
+	</insert>
+
+	<select id="getAttachList" parameterType="int" resultType="com.spring.mypage.attach.dto.AttachDTO">
+		SELECT
+		      atch_no 
+		    , board_no 
+		    , atch_file_name 
+		    , atch_original_name
+		    , atch_file_size 
+		    , atch_fancy_size
+		    , atch_content_type
+		    , atch_path 
+		FROM attach
+		WHERE board_no = #{boardNo}	
+	
+	
+	</select>
+
+
+
+
+
+
+</mapper>

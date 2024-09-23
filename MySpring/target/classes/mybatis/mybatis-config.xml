@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd" >
+<configuration>
+	
+	<settings>
+		<!-- DB 테이블의 컬럼명이 mem_id 에 대해 자바에서 memId 카멜식으로 알아서 매핑 -->
+		<setting name="mapUnderscoreToCamelCase" value="true"/>
+	
+	</settings>
+	
+	<typeAliases>
+		<typeAlias type="com.spring.mypage.member.dto.MemberDTO" alias="MemberDTO"/>
+		<typeAlias type="com.spring.mypage.board.dto.BoardDTO" alias="BoardDTO"/>
+		<typeAlias type="com.spring.mypage.board.dto.PhotoDTO" alias="PhotoDTO"/>
+	</typeAliases>
+
+
+</configuration>
